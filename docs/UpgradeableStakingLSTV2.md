@@ -4,9 +4,9 @@
 
 > UpgradeableStakingLSTV2 Contract
 
-V2 version for UpgradeableStakingLST, support stake share to other.
+This staking contract can convert the share token to it&#39;s LST. It just support LcDOT token on Acala.
 
-
+*After pool&#39;s share is converted into its LST token, this pool can be staked with LST token and before token both. This version conforms to the specification for upgradeable contracts.*
 
 ## Methods
 
@@ -248,7 +248,7 @@ function convertLSTPool(uint256 poolId, enum UpgradeableStakingLST.ConvertType c
 
 convert the share token of ‘poolId’ pool to LST token by `convertType`.
 
-
+*override to depracate it.*
 
 #### Parameters
 
@@ -256,6 +256,23 @@ convert the share token of ‘poolId’ pool to LST token by `convertType`.
 |---|---|---|
 | poolId | uint256 | The index of staking pool. |
 | convertType | enum UpgradeableStakingLST.ConvertType | The convert type. |
+
+### convertLSTPool
+
+```solidity
+function convertLSTPool(uint256 poolId, contract ILSTConvert convertor) external nonpayable
+```
+
+convert the share token of ‘poolId’ pool to LST token by `convertor`.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| poolId | uint256 | The index of staking pool. |
+| convertor | contract ILSTConvert | The convert contract address. |
 
 ### earned
 
@@ -452,6 +469,28 @@ Get the pause status of `operation` for `poolId` pool.
 |---|---|---|
 | _0 | bool | Returns True means paused. |
 
+### poolConvertors
+
+```solidity
+function poolConvertors(uint256 poolId) external view returns (contract ILSTConvert)
+```
+
+Get the LST convertor of `poolId` pool.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| poolId | uint256 | The index of staking pool. |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract ILSTConvert | Returns convertor address. |
+
 ### poolIndex
 
 ```solidity
@@ -479,6 +518,23 @@ function renounceOwnership() external nonpayable
 
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.*
 
+
+### resetPoolConvertor
+
+```solidity
+function resetPoolConvertor(uint256 poolId, contract ILSTConvert convertor) external nonpayable
+```
+
+Reset the `convertor` as the convertor of `poolId` pool.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| poolId | uint256 | The index of staking pool. |
+| convertor | contract ILSTConvert | The LST convertor. |
 
 ### rewardPerShare
 

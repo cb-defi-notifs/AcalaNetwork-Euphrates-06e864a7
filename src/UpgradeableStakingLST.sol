@@ -74,9 +74,9 @@ contract UpgradeableStakingLST is UpgradeableStakingCommon {
     /// @notice The threshold amount of DOT to mint by HOMA.
     uint256 public constant HOMA_MINT_THRESHOLD = 50_000_000_000; // 5 DOT
 
-    /// @dev The LST convert info info of pool.
+    /// @notice The LST convert info info of pool.
     /// (poolId => convertInfo)
-    mapping(uint256 => ConvertInfo) private _convertInfos;
+    mapping(uint256 => ConvertInfo) internal _convertInfos;
 
     /// @dev overwrite initialize() to mute initializer of UpgradeableStakingCommon
     function initialize() public override {}
@@ -159,7 +159,7 @@ contract UpgradeableStakingLST is UpgradeableStakingCommon {
         // asset index of LDOT: 1
         // here deadcode these params
         (bool valid, address[] memory assets) = IStableAsset(STABLE_ASSET).getStableAssetPoolTokens(0);
-        require(valid && assets[0] == DOT, "invalid stable asset pool");
+        require(valid && assets[0] == DOT && assets[1] == LDOT, "invalid stable asset pool");
         uint256[] memory paramAmounts = new uint256[](2);
 
         if (amount.div(2) >= HOMA_MINT_THRESHOLD) {
@@ -176,6 +176,7 @@ contract UpgradeableStakingLST is UpgradeableStakingCommon {
         }
 
         uint256 beforeTdotAmount = IERC20(TDOT).balanceOf(address(this));
+        // NOTE: allow max slippage here
         bool success = IStableAsset(STABLE_ASSET).stableAssetMint(0, paramAmounts, 0);
         require(success, "stable-asset mint failed");
 
@@ -206,6 +207,7 @@ contract UpgradeableStakingLST is UpgradeableStakingCommon {
         paramAmounts[1] = ldotParamAmount;
 
         uint256 beforeTdotAmount = IERC20(TDOT).balanceOf(address(this));
+        // NOTE: allow max slippage here
         bool success = IStableAsset(STABLE_ASSET).stableAssetMint(0, paramAmounts, 0);
         require(success, "stable-asset mint failed");
 
@@ -271,7 +273,7 @@ contract UpgradeableStakingLST is UpgradeableStakingCommon {
     /// @notice convert the share token of ‘poolId’ pool to LST token by `convertType`.
     /// @param poolId The index of staking pool.
     /// @param convertType The convert type.
-    function convertLSTPool(uint256 poolId, ConvertType convertType) external onlyOwner whenNotPaused {
+    function convertLSTPool(uint256 poolId, ConvertType convertType) external virtual onlyOwner whenNotPaused {
         IERC20 shareType = shareTypes(poolId);
         ConvertInfo storage convert = _convertInfos[poolId];
         require(address(convert.convertedShareType) == address(0), "already converted");
@@ -318,6 +320,7 @@ contract UpgradeableStakingLST is UpgradeableStakingCommon {
     /// @param amount The amount of share token to stake.
     function stake(uint256 poolId, uint256 amount)
         public
+        virtual
         override
         whenNotPaused
         poolOperationNotPaused(poolId, Operation.Stake)
@@ -380,6 +383,7 @@ contract UpgradeableStakingLST is UpgradeableStakingCommon {
     /// @return Returns (success).
     function unstake(uint256 poolId, uint256 amount)
         public
+        virtual
         override
         whenNotPaused
         poolOperationNotPaused(poolId, Operation.Unstake)
